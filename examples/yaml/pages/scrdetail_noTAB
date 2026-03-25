@@ -1,0 +1,1365 @@
+Screens:
+  scrPO_Detail:
+    Properties:
+      Fill: =varTheme.Main.BackgroundColor
+      OnVisible: |
+        =// scrPO -> Properties -> OnVisible
+        /*UpdateContext({
+            lvar_selectedPO: If(IsBlankOrError(lvar_selectedPO), {}, lvar_selectedPO),
+            lrec_selectedFund: If(IsBlankOrError(lrec_selectedFund), {}, lrec_selectedFund),
+            lrec_selectedJob: If(IsBlankOrError(lrec_selectedJob), {}, lrec_selectedJob),
+            lcol_selectedLineItems: If(IsBlankOrError(lcol_selectedLineItems), Table(), lcol_selectedLineItems)
+        });*/
+        UpdateContext({lvar_showPOpopup: false});
+        // UI state
+        UpdateContext({
+            showPoDrawer: false,
+            sortBy: "order_date",
+            q: "",
+            selStatus: "All",
+            showPPA: false
+        });
+
+        // Formatting helpers (use App.Formulas if you prefer)
+        Set(MoneyFmt, "£#,##0.00");
+        Set(DateFmt, "dd mmm yyyy");
+        Collect(colNavHistory, {Screen: App.ActiveScreen});
+        If(CountRows(colNavHistory) > 10, Remove(colNavHistory, First(colNavHistory)));
+        Set(varPoId, gvar_Selected_PO.id);
+        UpdateContext({ lrecAlloc: Blank() });
+        UpdateContext({ varConfirmDelete: false });
+        UpdateContext({lvar_showPOPopup: false});
+
+        ClearCollect(
+            ColAllocations,
+            'mosaic-dev'.dbospGetPoAllocations({
+                po_id: gvar_Selected_PO.id,
+                period_id: gvar_currentPeriodRecord.id
+            }).ResultSets.Table1
+        );
+    Children:
+      - vcon_mainLayoutPO_11:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Height: =Parent.Height
+            LayoutDirection: =LayoutDirection.Vertical
+            PaddingTop: =60
+            Width: =Parent.Width
+          Children:
+            - hcon_topSectionPO_11:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  LayoutMinWidth: =0
+                Children:
+                  - vcon_navigationSidebarPO_11:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =10
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =180
+                      Children:
+                        - comNavigationPO_11:
+                            Control: CanvasComponent
+                            ComponentName: comNavigation
+                            Properties:
+                              Fill: =Color.Transparent
+                              Height: =800
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Width: =Parent.Width
+                  - vcon_mainContentPO_11:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        FillPortions: =7
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        PaddingBottom: =varTheme.Main.Padding
+                        PaddingLeft: =varTheme.Main.Padding
+                        PaddingRight: =varTheme.Main.Padding
+                        PaddingTop: =varTheme.Main.Padding
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                      Children:
+                        - lbl_ScreenTitlePO_12:
+                            Control: Text@0.0.51
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              PaddingLeft: =10
+                              Size: =16
+                              Text: ="Purchase Order" & " - " & gvar_Selected_PO.po_number
+                              Weight: ='TextCanvas.Weight'.Bold
+                        - hcon_tabPODetailsPO_overview_2:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =10
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                            Children:
+                              - vcon_formSOR_1:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =10
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    PaddingBottom: =2
+                                    PaddingLeft: =2
+                                    PaddingRight: =2
+                                    PaddingTop: =2
+                                    Width: =Parent.Width - 20
+                                  Children:
+                                    - vcon_salesOrderFormMain_1:
+                                        Control: GroupContainer@1.5.0
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          Height: |-
+                                            =hcon_salesOrderDetailsTitle_3.Height
+                                                     + vcon_fromCompanyDetailsSOD_4.Height
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutGap: =10
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                                          LayoutOverflowY: =LayoutOverflow.Scroll
+                                        Children:
+                                          - hcon_salesOrderDetailsForm_3:
+                                              Control: GroupContainer@1.5.0
+                                              Variant: AutoLayout
+                                              Properties:
+                                                Fill: =RGBA(255, 255, 255, 1)
+                                                FillPortions: =0
+                                                LayoutAlignItems: =LayoutAlignItems.Center
+                                                LayoutDirection: =LayoutDirection.Vertical
+                                                LayoutMaxHeight: =
+                                                LayoutMaxWidth: =
+                                                LayoutMinHeight: =
+                                                LayoutOverflowY: =LayoutOverflow.Scroll
+                                                X: =40
+                                                Y: =40
+                                              Children:
+                                                - hcon_salesOrderDetailsTitle_3:
+                                                    Control: GroupContainer@1.5.0
+                                                    Variant: AutoLayout
+                                                    Properties:
+                                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                                      FillPortions: =0
+                                                      Height: =40
+                                                      LayoutAlignItems: =LayoutAlignItems.Center
+                                                      LayoutDirection: =LayoutDirection.Horizontal
+                                                      LayoutGap: =10
+                                                      LayoutMaxHeight: =
+                                                      LayoutMaxWidth: =
+                                                      PaddingBottom: =5
+                                                      PaddingLeft: =10
+                                                      PaddingRight: =10
+                                                      PaddingTop: =5
+                                                      RadiusBottomLeft: =0
+                                                      RadiusBottomRight: =0
+                                                      RadiusTopLeft: =0
+                                                      RadiusTopRight: =0
+                                                      Width: =Parent.Width
+                                                    Children:
+                                                      - lbl_orderDetailsTitleSOD_3:
+                                                          Control: Text@0.0.51
+                                                          Properties:
+                                                            FillPortions: =1
+                                                            Font: =Font.'Open Sans'
+                                                            LayoutMaxHeight: =
+                                                            LayoutMaxWidth: =
+                                                            Text: ="PO Details"
+                                                            VerticalAlign: =VerticalAlign.Middle
+                                                            Weight: ='TextCanvas.Weight'.Semibold
+                                                - vcon_fromCompanyDetailsSOD_4:
+                                                    Control: GroupContainer@1.5.0
+                                                    Variant: AutoLayout
+                                                    Properties:
+                                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                                      DropShadow: =DropShadow.None
+                                                      LayoutDirection: =LayoutDirection.Vertical
+                                                      LayoutMaxHeight: =
+                                                      LayoutMaxWidth: =
+                                                      LayoutMinHeight: =110
+                                                      PaddingLeft: =10
+                                                      PaddingRight: =10
+                                                      PaddingTop: =10
+                                                      Width: =Parent.Width
+                                                    Children:
+                                                      - hcon_fromCompanyDetails_6:
+                                                          Control: GroupContainer@1.5.0
+                                                          Variant: AutoLayout
+                                                          Properties:
+                                                            DropShadow: =DropShadow.None
+                                                            LayoutDirection: =LayoutDirection.Horizontal
+                                                            LayoutMaxHeight: =
+                                                            LayoutMaxWidth: =
+                                                            LayoutMinHeight: =50
+                                                            LayoutOverflowX: =LayoutOverflow.Scroll
+                                                          Children:
+                                                            - vcon_fromCmpName_1:
+                                                                Control: GroupContainer@1.5.0
+                                                                Variant: AutoLayout
+                                                                Properties:
+                                                                  DropShadow: =DropShadow.None
+                                                                  LayoutDirection: =LayoutDirection.Vertical
+                                                                  LayoutGap: =5
+                                                                  LayoutMaxHeight: =
+                                                                  LayoutMaxWidth: =
+                                                                  LayoutMinHeight: =Parent.Height
+                                                                  LayoutMinWidth: =200
+                                                                  PaddingLeft: =5
+                                                                Children:
+                                                                  - lbl_fromCmpNameTitle_5:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Height: =25
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        Text: ="PO ID"
+                                                                        VerticalAlign: =VerticalAlign.Middle
+                                                                        Width: =Parent.Width - 20
+                                                                  - In_FundJob_Income_2:
+                                                                      Control: Classic/TextInput@2.3.2
+                                                                      Properties:
+                                                                        BorderColor: =RGBA(0, 18, 107, 1)
+                                                                        Default: =gvar_Selected_PO.id
+                                                                        DisplayMode: =DisplayMode.Disabled
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =30
+                                                                        HoverBorderColor: =RGBA(0, 18, 107, 1)
+                                                                        HoverFill: =RGBA(186, 202, 226, 1)
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        LayoutMinWidth: =100
+                                                                        Size: =11
+                                                                        Width: =Parent.Width - 20
+                                                                  - lbl_shipToPostCodeTitle_2:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Height: =25
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        Text: ="PO Value"
+                                                                        VerticalAlign: =VerticalAlign.Middle
+                                                                        Width: =Parent.Width - 20
+                                                                  - In_FundJob_Income_18:
+                                                                      Control: Classic/TextInput@2.3.2
+                                                                      Properties:
+                                                                        BorderColor: =RGBA(0, 18, 107, 1)
+                                                                        Default: =gvar_Selected_PO.total_value_formatted
+                                                                        DisplayMode: =DisplayMode.Disabled
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =30
+                                                                        HoverBorderColor: =RGBA(0, 18, 107, 1)
+                                                                        HoverFill: =RGBA(186, 202, 226, 1)
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        LayoutMinWidth: =100
+                                                                        Size: =11
+                                                                        Width: =Parent.Width - 20
+                                                            - vcon_fromCmpEmail_4:
+                                                                Control: GroupContainer@1.5.0
+                                                                Variant: AutoLayout
+                                                                Properties:
+                                                                  DropShadow: =DropShadow.None
+                                                                  LayoutDirection: =LayoutDirection.Vertical
+                                                                  LayoutGap: =5
+                                                                  LayoutMaxHeight: =
+                                                                  LayoutMaxWidth: =
+                                                                  LayoutMinHeight: =Parent.Height
+                                                                  LayoutMinWidth: =200
+                                                                  PaddingLeft: =5
+                                                                Children:
+                                                                  - lbl_fromCmpEmailTitle_4:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Height: =25
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        Text: ="PO Number"
+                                                                        VerticalAlign: =VerticalAlign.Middle
+                                                                        Width: =Parent.Width - 20
+                                                                  - In_FundJob_Income_3:
+                                                                      Control: Classic/TextInput@2.3.2
+                                                                      Properties:
+                                                                        BorderColor: =RGBA(0, 18, 107, 1)
+                                                                        Default: =gvar_Selected_PO.po_number
+                                                                        DisplayMode: =DisplayMode.Disabled
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =30
+                                                                        HoverBorderColor: =RGBA(0, 18, 107, 1)
+                                                                        HoverFill: =RGBA(186, 202, 226, 1)
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        LayoutMinHeight: =30
+                                                                        LayoutMinWidth: =100
+                                                                        Size: =11
+                                                                        Width: =Parent.Width - 20
+                                                                  - lbl_shipToTelephoneTitle_2:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Height: =25
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        Text: ="Delivered Value"
+                                                                        VerticalAlign: =VerticalAlign.Middle
+                                                                        Width: =Parent.Width - 20
+                                                                  - In_FundJob_Income_19:
+                                                                      Control: Classic/TextInput@2.3.2
+                                                                      Properties:
+                                                                        BorderColor: =RGBA(0, 18, 107, 1)
+                                                                        Default: =gvar_Selected_PO.total_delivered_value_formatted
+                                                                        DisplayMode: =DisplayMode.Disabled
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =30
+                                                                        HoverBorderColor: =RGBA(0, 18, 107, 1)
+                                                                        HoverFill: =RGBA(186, 202, 226, 1)
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        LayoutMinHeight: =30
+                                                                        LayoutMinWidth: =100
+                                                                        Size: =11
+                                                                        Width: =Parent.Width - 20
+                                                            - vcon_fromCmpPhone_1:
+                                                                Control: GroupContainer@1.5.0
+                                                                Variant: AutoLayout
+                                                                Properties:
+                                                                  DropShadow: =DropShadow.None
+                                                                  LayoutDirection: =LayoutDirection.Vertical
+                                                                  LayoutGap: =5
+                                                                  LayoutMaxHeight: =
+                                                                  LayoutMaxWidth: =
+                                                                  LayoutMinHeight: =Parent.Height
+                                                                  LayoutMinWidth: =200
+                                                                  PaddingLeft: =5
+                                                                Children:
+                                                                  - lbl_fromCmpPhoneTitle_1:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Height: =25
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        Text: ="Vendor Name"
+                                                                        VerticalAlign: =VerticalAlign.Middle
+                                                                        Width: =Parent.Width - 20
+                                                                  - In_FundJob_Income_4:
+                                                                      Control: Classic/TextInput@2.3.2
+                                                                      Properties:
+                                                                        BorderColor: =RGBA(0, 18, 107, 1)
+                                                                        Default: =gvar_Selected_PO.vendor_name
+                                                                        DisplayMode: =DisplayMode.Disabled
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =30
+                                                                        HoverBorderColor: =RGBA(0, 18, 107, 1)
+                                                                        HoverFill: =RGBA(186, 202, 226, 1)
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        LayoutMinWidth: =100
+                                                                        Size: =11
+                                                                        Width: =Parent.Width - 20
+                                                                  - lbl_shipToEmailTitle_2:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Height: =25
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        Text: ="Invoiced Value"
+                                                                        VerticalAlign: =VerticalAlign.Middle
+                                                                        Width: =Parent.Width - 20
+                                                                  - In_FundJob_Income_20:
+                                                                      Control: Classic/TextInput@2.3.2
+                                                                      Properties:
+                                                                        BorderColor: =RGBA(0, 18, 107, 1)
+                                                                        Default: =gvar_Selected_PO.total_invoiced_value_formatted
+                                                                        DisplayMode: =DisplayMode.Disabled
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =30
+                                                                        HoverBorderColor: =RGBA(0, 18, 107, 1)
+                                                                        HoverFill: =RGBA(186, 202, 226, 1)
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        LayoutMinWidth: =100
+                                                                        Size: =11
+                                                                        Width: =Parent.Width - 20
+                                                            - vcon_fromCmpAddress_1:
+                                                                Control: GroupContainer@1.5.0
+                                                                Variant: AutoLayout
+                                                                Properties:
+                                                                  DropShadow: =DropShadow.None
+                                                                  LayoutDirection: =LayoutDirection.Vertical
+                                                                  LayoutGap: =5
+                                                                  LayoutMaxHeight: =
+                                                                  LayoutMaxWidth: =
+                                                                  LayoutMinHeight: =Parent.Height
+                                                                  LayoutMinWidth: =200
+                                                                  PaddingLeft: =5
+                                                                Children:
+                                                                  - lbl_fromCmpAddressTitle_1:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Height: =25
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        Text: ="Status"
+                                                                        VerticalAlign: =VerticalAlign.Middle
+                                                                        Width: =Parent.Width - 20
+                                                                  - In_FundJob_Income_5:
+                                                                      Control: Classic/TextInput@2.3.2
+                                                                      Properties:
+                                                                        BorderColor: =RGBA(0, 18, 107, 1)
+                                                                        Default: =gvar_Selected_PO.purchase_order_status_name
+                                                                        DisplayMode: =DisplayMode.Disabled
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =30
+                                                                        HoverBorderColor: =RGBA(0, 18, 107, 1)
+                                                                        HoverFill: =RGBA(186, 202, 226, 1)
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        LayoutMinWidth: =100
+                                                                        Size: =11
+                                                                        Width: =Parent.Width - 20
+                                                                  - lbl_shipToMethodTitle_2:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Height: =25
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        Text: ="Period"
+                                                                        VerticalAlign: =VerticalAlign.Middle
+                                                                        Width: =Parent.Width - 20
+                                                                  - In_FundJob_Income_21:
+                                                                      Control: Classic/TextInput@2.3.2
+                                                                      Properties:
+                                                                        BorderColor: =RGBA(0, 18, 107, 1)
+                                                                        Default: ="Q" & gvar_Selected_PO.period_fiscal_quarter & " " & gvar_Selected_PO.period_fiscal_year
+                                                                        DisplayMode: =DisplayMode.Disabled
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =30
+                                                                        HoverBorderColor: =RGBA(0, 18, 107, 1)
+                                                                        HoverFill: =RGBA(186, 202, 226, 1)
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        LayoutMinWidth: =100
+                                                                        Size: =11
+                                                                        Width: =Parent.Width - 20
+                                          - con_DivisionModal_4:
+                                              Control: GroupContainer@1.5.0
+                                              Variant: AutoLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.Regular
+                                                Fill: =RGBA(255, 255, 255, 1)
+                                                Height: =Min(Parent.Height - 80, 480)
+                                                LayoutDirection: =LayoutDirection.Vertical
+                                                LayoutMaxHeight: =
+                                                LayoutMaxWidth: =
+                                                LayoutMinHeight: =200
+                                                PaddingBottom: =varTheme.Body.Container.Padding
+                                                PaddingLeft: =varTheme.Body.Container.Padding
+                                                PaddingRight: =varTheme.Body.Container.Padding
+                                                PaddingTop: =varTheme.Body.Container.Padding
+                                                RadiusBottomLeft: =8
+                                                RadiusBottomRight: =8
+                                                RadiusTopLeft: =8
+                                                RadiusTopRight: =8
+                                                Width: =(Parent.Width/1.4)
+                                                X: =(Parent.Width-Self.Width)/2
+                                                Y: =(Parent.Height-Self.Height)/2
+                                              Children:
+                                                - con_jobCard_13:
+                                                    Control: GroupContainer@1.5.0
+                                                    Variant: AutoLayout
+                                                    Properties:
+                                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                                      DropShadow: =DropShadow.None
+                                                      FillPortions: =0
+                                                      Height: =75
+                                                      LayoutDirection: =LayoutDirection.Vertical
+                                                      LayoutMaxHeight: =
+                                                      LayoutMaxWidth: =
+                                                      LayoutMinHeight: =75
+                                                      Width: =Parent.Width-20
+                                                    Children:
+                                                      - hcon_shipToCountryCodeDelivery_25:
+                                                          Control: GroupContainer@1.5.0
+                                                          Variant: AutoLayout
+                                                          Properties:
+                                                            DropShadow: =DropShadow.None
+                                                            Height: =Parent.Height
+                                                            LayoutDirection: =LayoutDirection.Horizontal
+                                                            LayoutGap: =10
+                                                            LayoutMaxHeight: =
+                                                            LayoutMaxWidth: =
+                                                            LayoutMinHeight: =70
+                                                            PaddingLeft: =10
+                                                            PaddingRight: =10
+                                                          Children:
+                                                            - vcon_shipToName_39:
+                                                                Control: GroupContainer@1.5.0
+                                                                Variant: AutoLayout
+                                                                Properties:
+                                                                  DropShadow: =DropShadow.None
+                                                                  Height: =Parent.Height
+                                                                  LayoutDirection: =LayoutDirection.Vertical
+                                                                  LayoutMaxHeight: =
+                                                                  LayoutMaxWidth: =
+                                                                  LayoutMinHeight: =Parent.Height
+                                                                  LayoutMinWidth: =200
+                                                                  X: =40
+                                                                  Y: =40
+                                                                Children:
+                                                                  - lbl_txt_jobId_36:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =25
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        Text: ="Period"
+                                                                        VerticalAlign: =VerticalAlign.Middle
+                                                                        Width: =Parent.Width - 20
+                                                                  - In_FundJob_Income_22:
+                                                                      Control: Classic/TextInput@2.3.2
+                                                                      Properties:
+                                                                        BorderColor: =RGBA(0, 18, 107, 1)
+                                                                        BorderStyle: =BorderStyle.None
+                                                                        Default: =gvar_currentPeriodRecord.name
+                                                                        DisplayMode: =DisplayMode.Disabled
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =cmb_FundJob_namePO.Height
+                                                                        HoverBorderColor: =RGBA(0, 18, 107, 1)
+                                                                        HoverFill: =RGBA(186, 202, 226, 1)
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        LayoutMinWidth: =100
+                                                                        PaddingBottom: =0
+                                                                        PaddingLeft: =5
+                                                                        PaddingRight: =0
+                                                                        PaddingTop: =0
+                                                                        Size: =11
+                                                                        Width: =Parent.Width - 20
+                                                            - vcon_shipToName_36:
+                                                                Control: GroupContainer@1.5.0
+                                                                Variant: AutoLayout
+                                                                Properties:
+                                                                  DropShadow: =DropShadow.None
+                                                                  Height: =Parent.Height
+                                                                  LayoutDirection: =LayoutDirection.Vertical
+                                                                  LayoutMaxHeight: =
+                                                                  LayoutMaxWidth: =
+                                                                  LayoutMinHeight: =Parent.Height
+                                                                  LayoutMinWidth: =200
+                                                                Children:
+                                                                  - lbl_txt_jobId_33:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =25
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        Text: ="Fund Name"
+                                                                        VerticalAlign: =VerticalAlign.Middle
+                                                                        Width: =Parent.Width - 20
+                                                                  - cmb_FundJob_namePO:
+                                                                      Control: ComboBox@0.0.51
+                                                                      Properties:
+                                                                        DefaultSelectedItems: =LookUp(ColFunds, id = lrecAlloc.fund_id)
+                                                                        Font: =Font.'Open Sans'
+                                                                        InputTextPlaceholder: ="Select Fund"
+                                                                        Items: |-
+                                                                          =Filter(
+                                                                                  ColFunds,
+                                                                                  period_id = gvar_currentPeriodRecord.id
+                                                                              )
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        Width: =Parent.Width
+                                                                      Children:
+                                                                        - name6:
+                                                                            Control: ComboBoxDataField@1.5.0
+                                                                            Variant: textualColumn
+                                                                            IsLocked: true
+                                                                            Properties:
+                                                                              FieldDisplayName: ="name"
+                                                                              FieldName: ="name"
+                                                                              FieldType: ="s"
+                                                                              Order: =2
+                                                            - vcon_shipToName_40:
+                                                                Control: GroupContainer@1.5.0
+                                                                Variant: AutoLayout
+                                                                Properties:
+                                                                  DropShadow: =DropShadow.None
+                                                                  Height: =Parent.Height
+                                                                  LayoutDirection: =LayoutDirection.Vertical
+                                                                  LayoutMaxHeight: =
+                                                                  LayoutMaxWidth: =
+                                                                  LayoutMinHeight: =Parent.Height
+                                                                  LayoutMinWidth: =200
+                                                                Children:
+                                                                  - lbl_txt_jobId_37:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =25
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        Text: ="Job Name"
+                                                                        VerticalAlign: =VerticalAlign.Middle
+                                                                        Width: =Parent.Width - 20
+                                                                  - cmb_FundJob_JobnamePO:
+                                                                      Control: ComboBox@0.0.51
+                                                                      Properties:
+                                                                        DefaultSelectedItems: =LookUp(ColFundJobs, id = lrecAlloc.fund_job_id)
+                                                                        Font: =Font.'Open Sans'
+                                                                        InputTextPlaceholder: ="Select Job"
+                                                                        Items: |-
+                                                                          =Filter(
+                                                                              ColFundJobs,
+                                                                              period_id = gvar_currentPeriodRecord.id &&
+                                                                              fund_id = cmb_FundJob_namePO.Selected.id &&
+                                                                              is_active = true
+                                                                          )
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        Width: =Parent.Width
+                                                                      Children:
+                                                                        - job_name1:
+                                                                            Control: ComboBoxDataField@1.5.0
+                                                                            Variant: textualColumn
+                                                                            IsLocked: true
+                                                                            Properties:
+                                                                              FieldDisplayName: ="job_name"
+                                                                              FieldName: ="job_name"
+                                                                              FieldType: ="s"
+                                                                              Order: =1
+                                                            - vcon_shipToName_37:
+                                                                Control: GroupContainer@1.5.0
+                                                                Variant: AutoLayout
+                                                                Properties:
+                                                                  DropShadow: =DropShadow.None
+                                                                  Height: =Parent.Height
+                                                                  LayoutDirection: =LayoutDirection.Vertical
+                                                                  LayoutMaxHeight: =
+                                                                  LayoutMaxWidth: =
+                                                                  LayoutMinHeight: =Parent.Height
+                                                                  LayoutMinWidth: =200
+                                                                  PaddingLeft: =2
+                                                                Children:
+                                                                  - lbl_txt_jobId_34:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =25
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        Text: ="Amount"
+                                                                        VerticalAlign: =VerticalAlign.Middle
+                                                                        Width: =Parent.Width - 20
+                                                                  - txtAddAmount_1:
+                                                                      Control: Classic/TextInput@2.3.2
+                                                                      Properties:
+                                                                        BorderColor: =RGBA(0, 18, 107, 1)
+                                                                        BorderThickness: =0.5
+                                                                        Default: =If(!IsBlank(lrecAlloc), lrecAlloc.amount, Blank())
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =cmb_FundJob_namePO.Height
+                                                                        HoverBorderColor: =RGBA(0, 18, 107, 1)
+                                                                        HoverFill: =RGBA(186, 202, 226, 1)
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        LayoutMinWidth: =Parent.Width
+                                                                        PaddingLeft: =5
+                                                                        PaddingRight: =0
+                                                                        Width: =Parent.Width-20
+                                                                        X: =40
+                                                                        Y: =40
+                                                            - vcon_shipToName_38:
+                                                                Control: GroupContainer@1.5.0
+                                                                Variant: AutoLayout
+                                                                Properties:
+                                                                  DropShadow: =DropShadow.None
+                                                                  Height: =Parent.Height
+                                                                  LayoutAlignItems: =LayoutAlignItems.Center
+                                                                  LayoutDirection: =LayoutDirection.Vertical
+                                                                  LayoutMaxHeight: =
+                                                                  LayoutMaxWidth: =110
+                                                                  LayoutMinHeight: =Parent.Height
+                                                                  LayoutMinWidth: =0
+                                                                  Width: =150
+                                                                  X: =40
+                                                                  Y: =40
+                                                                Children:
+                                                                  - lbl_txt_jobId_35:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Height: =25
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        Text: =""
+                                                                        VerticalAlign: =VerticalAlign.Middle
+                                                                        Width: =Parent.Width - 20
+                                                                  - btnAddLine_1:
+                                                                      Control: Button@0.0.45
+                                                                      Properties:
+                                                                        Align: =Align.Center
+                                                                        DisplayMode: |-
+                                                                          =If(
+                                                                              Sum(galAlloc_1.AllItems, amount) >= gvar_Selected_PO.total_value_raw,
+                                                                              DisplayMode.Disabled,
+                                                                              DisplayMode.Edit
+                                                                          )
+                                                                        Height: =txtAddAmount_1.Height
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        OnSelect: "=// Handles both adding new allocations and editing existing ones\nWith(\n    {\n        _amt: Value(txtAddAmount_1.Text),\n        _fund: cmb_FundJob_namePO.Selected,\n        _job: cmb_FundJob_JobnamePO.Selected,\n        _isEdit: !IsBlank(lrecAlloc),\n        _oldAmount: If(!IsBlank(lrecAlloc), lrecAlloc.amount, 0),\n        _currentTotal: Sum(galAlloc_1.AllItems, amount),\n        _poTotal: gvar_Selected_PO.total_value_raw\n    },\n    \n    // Validate inputs\n    If(\n        IsBlank(_job) || IsBlank(_amt),\n        Notify(\"Period, Fund, Job, and Amount are all mandatory fields.\", NotificationType.Error),\n        \n        // Validate total allocation doesn't exceed PO value\n        If(\n            (_currentTotal - _oldAmount + _amt) > _poTotal,\n            Notify(\n                \"Allocation exceeds PO value. Total allocated would be £\" & \n                Text(_currentTotal - _oldAmount + _amt, \"#,##0.00\") & \n                \" but PO value is £\" & Text(_poTotal, \"#,##0.00\"),\n                NotificationType.Error\n            ),\n            \n            // All validations passed - proceed with upsert\n            ClearCollect(\n                ColAllocations,\n                'mosaic-dev'.dbospUpsertPoAllocation({\n                    mode: \"PO\",\n                    fund_job_id: _job.id,\n                    po_id: gvar_Selected_PO.id,\n                    period_id: gvar_currentPeriodRecord.id,\n                    amount: _amt,\n                    user_id: User().EntraObjectId,\n                    user_name: User().FullName\n                }).ResultSets.Table1\n            );\n            \n            // Clear edit mode and reset form\n            UpdateContext({ lrecAlloc: Blank() });\n            Reset(cmb_FundJob_namePO);\n            Reset(txtAddAmount_1);\n            SetFocus(txtAddAmount_1);\n            \n            // Show success message\n            Notify(\n                If(_isEdit, \"Allocation updated successfully.\", \"Allocation added successfully.\"),\n                NotificationType.Success\n            )\n        )\n    )\n);"
+                                                                        Text: =If(IsBlank(lrecAlloc), "Add Line", "Edit Line")
+                                                                        VerticalAlign: =VerticalAlign.Middle
+                                                                        X: =40
+                                                                        Y: =40
+                                                            - btn_Refresh_1:
+                                                                Control: Button@0.0.45
+                                                                Properties:
+                                                                  Align: =Align.Center
+                                                                  AlignInContainer: =AlignInContainer.Center
+                                                                  Appearance: ='ButtonCanvas.Appearance'.Secondary
+                                                                  BorderStyle: =BorderStyle.None
+                                                                  FillPortions: =1
+                                                                  FontWeight: =FontWeight.Bold
+                                                                  Height: =btnAddLine_1.Height
+                                                                  Icon: ="ArrowReset"
+                                                                  IconStyle: ='ButtonCanvas.IconStyle'.Filled
+                                                                  LayoutMaxHeight: =
+                                                                  LayoutMaxWidth: =40
+                                                                  LayoutMinWidth: =40
+                                                                  OnSelect: |-
+                                                                    =// btn_resetAllocation.OnSelect
+                                                                    // Clears edit mode and resets form inputs without reloading from database
+                                                                    // This allows user to start fresh without losing other unsaved work
+
+                                                                    // Exit edit mode
+                                                                    UpdateContext({ lrecAlloc: Blank() });
+
+                                                                    // Reset all form controls
+                                                                    Reset(cmb_FundJob_namePO);
+                                                                    Reset(txtAddAmount_1);
+
+                                                                    // Reset gallery selection if needed
+                                                                    Reset(galAlloc_1);
+
+                                                                    // Set focus back to amount field
+                                                                    SetFocus(txtAddAmount_1);
+
+                                                                    // Optional: Notify user
+                                                                    Notify("Form reset. Ready to add new allocation.", NotificationType.Information);
+                                                                  Text: =
+                                                                  VerticalAlign: =VerticalAlign.Middle
+                                                                  Width: =10
+                                                                  X: =40
+                                                                  Y: =40
+                                                - hcon_shipToCountryCodeDelivery_26:
+                                                    Control: GroupContainer@1.5.0
+                                                    Variant: AutoLayout
+                                                    Properties:
+                                                      DropShadow: =DropShadow.None
+                                                      LayoutDirection: =LayoutDirection.Horizontal
+                                                      LayoutMaxHeight: =
+                                                      LayoutMaxWidth: =
+                                                      LayoutMinHeight: =70
+                                                      X: =40
+                                                      Y: =40
+                                                    Children:
+                                                      - vcon_RecentPurchaseOrdersHS_17:
+                                                          Control: GroupContainer@1.5.0
+                                                          Variant: AutoLayout
+                                                          Properties:
+                                                            DropShadow: =DropShadow.Regular
+                                                            Fill: =varTheme.Body.Container.BackgroundColor
+                                                            LayoutDirection: =LayoutDirection.Vertical
+                                                            LayoutGap: =varTheme.Body.Container.Padding
+                                                            LayoutMaxHeight: =
+                                                            LayoutMaxWidth: =
+                                                            LayoutOverflowY: =LayoutOverflow.Scroll
+                                                            PaddingBottom: =varTheme.Body.Container.Padding
+                                                            PaddingLeft: =varTheme.Body.Container.Padding
+                                                            PaddingRight: =varTheme.Body.Container.Padding
+                                                            PaddingTop: =varTheme.Body.Container.Padding
+                                                            X: =40
+                                                            Y: =40
+                                                          Children:
+                                                            - hcon_PurchaseOrderHeaders_16:
+                                                                Control: GroupContainer@1.5.0
+                                                                Variant: AutoLayout
+                                                                Properties:
+                                                                  DropShadow: =DropShadow.None
+                                                                  FillPortions: =0
+                                                                  Height: =20
+                                                                  LayoutDirection: =LayoutDirection.Horizontal
+                                                                  LayoutMaxHeight: =
+                                                                  LayoutMaxWidth: =
+                                                                  LayoutMinWidth: =0
+                                                                  Width: =Parent.Width
+                                                                Children:
+                                                                  - lbl_POIDHeader_24:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Align: ='TextCanvas.Align'.Center
+                                                                        BorderStyle: =BorderStyle.None
+                                                                        BorderThickness: =1
+                                                                        FillPortions: =1
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =Parent.Height
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        LayoutMinWidth: =0
+                                                                        Size: =13
+                                                                        Text: ="Period Name"
+                                                                        VerticalAlign: =VerticalAlign.Top
+                                                                        Weight: ='TextCanvas.Weight'.Semibold
+                                                                  - lbl_POReferenceHeader_20:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Align: ='TextCanvas.Align'.Center
+                                                                        BorderStyle: =BorderStyle.None
+                                                                        BorderThickness: =1
+                                                                        FillPortions: =1
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =Parent.Height
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        LayoutMinWidth: =0
+                                                                        Size: =13
+                                                                        Text: ="Fund"
+                                                                        VerticalAlign: =VerticalAlign.Top
+                                                                        Weight: ='TextCanvas.Weight'.Semibold
+                                                                  - lbl_POReferenceHeader_22:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Align: ='TextCanvas.Align'.Center
+                                                                        BorderStyle: =BorderStyle.None
+                                                                        BorderThickness: =1
+                                                                        FillPortions: =1
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =Parent.Height
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        LayoutMinWidth: =0
+                                                                        Size: =13
+                                                                        Text: ="Job"
+                                                                        VerticalAlign: =VerticalAlign.Top
+                                                                        Weight: ='TextCanvas.Weight'.Semibold
+                                                                  - lbl_DateCreatedHeader_24:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Align: ='TextCanvas.Align'.Center
+                                                                        BorderStyle: =BorderStyle.None
+                                                                        BorderThickness: =1
+                                                                        FillPortions: =1
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =Parent.Height
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        LayoutMinWidth: =0
+                                                                        Size: =13
+                                                                        Text: ="Amount"
+                                                                        VerticalAlign: =VerticalAlign.Top
+                                                                        Weight: ='TextCanvas.Weight'.Semibold
+                                                                  - lbl_SupplierCodeHeader_14:
+                                                                      Control: Text@0.0.51
+                                                                      Properties:
+                                                                        Align: ='TextCanvas.Align'.Center
+                                                                        BorderStyle: =BorderStyle.None
+                                                                        BorderThickness: =1
+                                                                        FillPortions: =1
+                                                                        Font: =Font.'Open Sans'
+                                                                        Height: =Parent.Height
+                                                                        LayoutMaxHeight: =
+                                                                        LayoutMaxWidth: =
+                                                                        LayoutMinWidth: =0
+                                                                        Size: =13
+                                                                        Text: ="Remove"
+                                                                        VerticalAlign: =VerticalAlign.Top
+                                                                        Weight: ='TextCanvas.Weight'.Semibold
+                                                            - galAlloc_1:
+                                                                Control: Gallery@2.15.0
+                                                                Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                                                                Properties:
+                                                                  AccessibleLabel: ="Purchase orders list, " & CountRows(Self.AllItems) & " orders"
+                                                                  Items: |
+                                                                    =Filter(ColAllocations, po_id = gvar_Selected_PO.id)
+                                                                  LayoutMaxHeight: =
+                                                                  LayoutMaxWidth: =
+                                                                  LayoutMinHeight: =8
+                                                                  OnSelect: |-
+                                                                    =// galAlloc.OnSelect
+                                                                    UpdateContext({ lrecAlloc: ThisItem });
+                                                                    UpdateContext({ lrecFundJobRec:
+                                                                        // If ColFundJobs.fund_job_id is Number and lrecAlloc.fund_job_id is Number:
+                                                                        LookUp(ColFundJobs, id = ThisItem.fund_job_id)
+                                                                    });
+                                                                    Reset(txtAddAmount_1);
+                                                                  TemplateSize: =30
+                                                                Children:
+                                                                  - hcon_RecentPurchaseOrderValues_16:
+                                                                      Control: GroupContainer@1.5.0
+                                                                      Variant: AutoLayout
+                                                                      Properties:
+                                                                        BorderColor: =RGBA(214, 221, 224, 1)
+                                                                        DropShadow: =DropShadow.None
+                                                                        Height: =30
+                                                                        LayoutAlignItems: =LayoutAlignItems.Center
+                                                                        LayoutDirection: =LayoutDirection.Horizontal
+                                                                        Width: =Parent.Width
+                                                                      Children:
+                                                                        - lblPeriod_1:
+                                                                            Control: Text@0.0.51
+                                                                            Properties:
+                                                                              Align: ='TextCanvas.Align'.Center
+                                                                              BorderStyle: =BorderStyle.None
+                                                                              BorderThickness: =1
+                                                                              FillPortions: =1
+                                                                              Font: =Font.'Open Sans'
+                                                                              Height: =20
+                                                                              LayoutMaxHeight: =
+                                                                              LayoutMaxWidth: =
+                                                                              LayoutMinWidth: =0
+                                                                              Size: =13
+                                                                              Text: =ThisItem.period_label
+                                                                              VerticalAlign: =VerticalAlign.Top
+                                                                              Weight: ='TextCanvas.Weight'.Regular
+                                                                        - lblFund:
+                                                                            Control: Text@0.0.51
+                                                                            Properties:
+                                                                              Align: ='TextCanvas.Align'.Center
+                                                                              BorderStyle: =BorderStyle.None
+                                                                              BorderThickness: =1
+                                                                              FillPortions: =1
+                                                                              Font: =Font.'Open Sans'
+                                                                              Height: =20
+                                                                              LayoutMaxHeight: =
+                                                                              LayoutMaxWidth: =
+                                                                              LayoutMinWidth: =0
+                                                                              Size: =13
+                                                                              Text: =ThisItem.fund_name
+                                                                              VerticalAlign: =VerticalAlign.Top
+                                                                              Weight: ='TextCanvas.Weight'.Regular
+                                                                        - lblJob:
+                                                                            Control: Text@0.0.51
+                                                                            Properties:
+                                                                              Align: ='TextCanvas.Align'.Center
+                                                                              BorderStyle: =BorderStyle.None
+                                                                              BorderThickness: =1
+                                                                              FillPortions: =1
+                                                                              Font: =Font.'Open Sans'
+                                                                              Height: =20
+                                                                              LayoutMaxHeight: =
+                                                                              LayoutMaxWidth: =
+                                                                              LayoutMinWidth: =0
+                                                                              Size: =13
+                                                                              Text: =ThisItem.job_name
+                                                                              VerticalAlign: =VerticalAlign.Top
+                                                                              Weight: ='TextCanvas.Weight'.Regular
+                                                                        - lblAmount_1:
+                                                                            Control: Text@0.0.51
+                                                                            Properties:
+                                                                              Align: ='TextCanvas.Align'.Center
+                                                                              BorderStyle: =BorderStyle.None
+                                                                              BorderThickness: =1
+                                                                              FillPortions: =1
+                                                                              Font: =Font.'Open Sans'
+                                                                              Height: =20
+                                                                              LayoutMaxHeight: =
+                                                                              LayoutMaxWidth: =
+                                                                              LayoutMinWidth: =0
+                                                                              Text: |-
+                                                                                =//ThisItem.supplier_id
+                                                                                Text(ThisItem.amount, "£#,##0")
+                                                                              VerticalAlign: =VerticalAlign.Top
+                                                                              Weight: ='TextCanvas.Weight'.Regular
+                                                                        - icon_Delete:
+                                                                            Control: Classic/Icon@2.5.0
+                                                                            Properties:
+                                                                              AccessibleLabel: ="View purchase order details"
+                                                                              BorderStyle: =BorderStyle.None
+                                                                              BorderThickness: =1
+                                                                              Color: =ColorValue("#1946fa")
+                                                                              FillPortions: =1
+                                                                              Height: =20
+                                                                              Icon: =Icon.Trash
+                                                                              LayoutMaxHeight: =
+                                                                              LayoutMaxWidth: =
+                                                                              OnSelect: |-
+                                                                                =// Opens delete confirmation popup
+
+                                                                                // Store which allocation to delete
+                                                                                Set(gvar_Selected_Allocation, ThisItem);
+
+                                                                                // Show confirmation popup
+                                                                                UpdateContext({lvar_showPOPopup: true});
+                                                                              Width: =lbl_lineItemTotalHeaderPO_11.Width
+                                                                              X: =40
+                                                                              Y: =40
+                                                                  - rect_onselect_1:
+                                                                      Control: Rectangle@2.3.0
+                                                                      Properties:
+                                                                        BorderColor: =RGBA(0, 18, 107, 1)
+                                                                        Fill: =RGBA(255, 255, 255, 0)
+                                                                        Height: =hcon_RecentPurchaseOrderValues_16.Height
+                                                                        HoverFill: =
+                                                                        OnSelect: |-
+                                                                          =UpdateContext({ lrecAlloc: ThisItem });
+                                                                        PressedFill: =
+                                                                        Width: =Parent.Width - icon_Delete.Width
+                                                                  - rect_rowSeparatorHS_15:
+                                                                      Control: Rectangle@2.3.0
+                                                                      Properties:
+                                                                        Fill: =Color.LightGray
+                                                                        Height: =1
+                                                                        OnSelect: =Select(Parent)
+                                                                        Width: =Parent.Width
+                                                                        Y: =Parent.TemplateHeight
+                                    - hcon_salesOrderSummary_1:
+                                        Control: GroupContainer@1.5.0
+                                        Variant: AutoLayout
+                                        Properties:
+                                          Fill: =RGBA(255, 255, 255, 1)
+                                          FillPortions: =0
+                                          Height: =80
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                                          LayoutMinHeight: =80
+                                          LayoutOverflowX: =LayoutOverflow.Scroll
+                                        Children:
+                                          - vcon_salesOrderTotalsActions_1:
+                                              Control: GroupContainer@1.5.0
+                                              Variant: AutoLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.None
+                                                FillPortions: =0.6
+                                                LayoutDirection: =LayoutDirection.Vertical
+                                                LayoutMaxHeight: =
+                                                LayoutMaxWidth: =
+                                                LayoutMinHeight: =
+                                                LayoutMinWidth: =Parent.Width
+                                                PaddingBottom: =10
+                                                PaddingLeft: =10
+                                                PaddingRight: =10
+                                                PaddingTop: =10
+                                                Width: =Parent.Width
+                                              Children:
+                                                - hcon_salesOrderActionButtons_1:
+                                                    Control: GroupContainer@1.5.0
+                                                    Variant: AutoLayout
+                                                    Properties:
+                                                      DropShadow: =DropShadow.None
+                                                      LayoutAlignItems: =LayoutAlignItems.End
+                                                      LayoutDirection: =LayoutDirection.Horizontal
+                                                      LayoutGap: =20
+                                                      LayoutJustifyContent: =LayoutJustifyContent.End
+                                                      LayoutMaxHeight: =
+                                                      LayoutMaxWidth: =
+                                                      LayoutMinHeight: =20
+                                                      LayoutMinWidth: =Parent.Width -10
+                                                      Width: =Parent.Width-10
+                                                    Children:
+                                                      - lbl_centerPopupTitleSOD_23:
+                                                          Control: Text@0.0.51
+                                                          Properties:
+                                                            Align: ='TextCanvas.Align'.Center
+                                                            AlignInContainer: =AlignInContainer.Center
+                                                            FillPortions: =1
+                                                            Height: =Parent.Height
+                                                            LayoutMaxHeight: =
+                                                            LayoutMaxWidth: =
+                                                            Size: =16
+                                                            Text: |
+                                                              ="Amount available for allocation"
+                                                            VerticalAlign: =VerticalAlign.Middle
+                                                            Weight: ='TextCanvas.Weight'.Semibold
+                                                            X: =40
+                                                            Y: =40
+                                                      - lbl_centerPopupTitleSOD_24:
+                                                          Control: Text@0.0.51
+                                                          Properties:
+                                                            Align: ='TextCanvas.Align'.Center
+                                                            FillPortions: =1
+                                                            FontColor: |-
+                                                              =With(
+                                                                  {
+                                                                      _total: Coalesce(Sum(galAlloc_1.AllItems, amount), 0),
+                                                                      _poValue: gvar_Selected_PO.total_value_raw
+                                                                  },
+                                                                  Switch(
+                                                                      true,
+                                                                      _total = 0, Color.Red,                   // No allocations (red)
+                                                                      _total = _poValue, Color.Green,          // Perfect match (green)
+                                                                      _total > _poValue, Color.Red,            // Over budget (red)
+                                                                      _total < _poValue, RGBA(255, 165, 0, 1)  // Under budget (orange)
+                                                                  )
+                                                              )
+                                                            Height: =Parent.Height
+                                                            LayoutMaxHeight: =
+                                                            LayoutMaxWidth: =
+                                                            Size: =16
+                                                            Text: ="Amount allocated"
+                                                            VerticalAlign: =VerticalAlign.Middle
+                                                            Weight: ='TextCanvas.Weight'.Semibold
+                                                      - lbl_centerPopupTitleSOD_25:
+                                                          Control: Text@0.0.51
+                                                          Properties:
+                                                            Align: ='TextCanvas.Align'.Center
+                                                            FillPortions: =1
+                                                            Height: =Parent.Height
+                                                            LayoutMaxHeight: =
+                                                            LayoutMaxWidth: =
+                                                            Size: =16
+                                                            Text: |
+                                                              ="Amount remaining to be allocated"
+                                                            VerticalAlign: =VerticalAlign.Middle
+                                                            Weight: ='TextCanvas.Weight'.Semibold
+                                                            X: =40
+                                                            Y: =40
+                                                - hcon_salesOrderActionButtons_2:
+                                                    Control: GroupContainer@1.5.0
+                                                    Variant: AutoLayout
+                                                    Properties:
+                                                      DropShadow: =DropShadow.None
+                                                      LayoutAlignItems: =LayoutAlignItems.End
+                                                      LayoutDirection: =LayoutDirection.Horizontal
+                                                      LayoutGap: =20
+                                                      LayoutJustifyContent: =LayoutJustifyContent.End
+                                                      LayoutMaxHeight: =
+                                                      LayoutMaxWidth: =
+                                                      LayoutMinHeight: =20
+                                                      LayoutMinWidth: =Parent.Width -10
+                                                      Width: =Parent.Width-10
+                                                    Children:
+                                                      - lbl_centerPopupTitleSOD_26:
+                                                          Control: Text@0.0.51
+                                                          Properties:
+                                                            Align: ='TextCanvas.Align'.Center
+                                                            FillPortions: =1
+                                                            Height: =Parent.Height
+                                                            LayoutMaxHeight: =
+                                                            LayoutMaxWidth: =
+                                                            Size: =16
+                                                            Text: |
+                                                              =Text(gvar_Selected_PO.total_value_raw, "£#,##0.00")
+                                                            VerticalAlign: =VerticalAlign.Middle
+                                                            Weight: ='TextCanvas.Weight'.Semibold
+                                                            X: =40
+                                                            Y: =40
+                                                      - lbl_centerPopupTitleSOD_27:
+                                                          Control: Text@0.0.51
+                                                          Properties:
+                                                            Align: ='TextCanvas.Align'.Center
+                                                            FillPortions: =1
+                                                            FontColor: |-
+                                                              =With(
+                                                                  {
+                                                                      _total: Coalesce(Sum(galAlloc_1.AllItems, amount), 0),
+                                                                      _poValue: gvar_Selected_PO.total_value_raw
+                                                                  },
+                                                                  Switch(
+                                                                      true,
+                                                                      _total = 0, Color.Red,                   // No allocations (red)
+                                                                      _total = _poValue, Color.Green,          // Perfect match (green)
+                                                                      _total > _poValue, Color.Red,            // Over budget (red)
+                                                                      _total < _poValue, RGBA(255, 165, 0, 1)  // Under budget (orange)
+                                                                  )
+                                                              )
+                                                            Height: =Parent.Height
+                                                            LayoutMaxHeight: =
+                                                            LayoutMaxWidth: =
+                                                            Size: =16
+                                                            Text: |-
+                                                              =Text(
+                                                                  Coalesce(Sum(galAlloc_1.AllItems, amount), 0), 
+                                                                  "£#,##0.00"
+                                                              )
+                                                            VerticalAlign: =VerticalAlign.Middle
+                                                            Weight: ='TextCanvas.Weight'.Semibold
+                                                      - lbl_centerPopupTitleSOD_28:
+                                                          Control: Text@0.0.51
+                                                          Properties:
+                                                            Align: ='TextCanvas.Align'.Center
+                                                            FillPortions: =1
+                                                            Height: =Parent.Height
+                                                            LayoutMaxHeight: =
+                                                            LayoutMaxWidth: =
+                                                            Size: =16
+                                                            Text: |
+                                                              =Text(
+                                                                  gvar_Selected_PO.total_value_raw - Sum(galAlloc_1.AllItems, amount), 
+                                                                  "£#,##0.00"
+                                                              )
+                                                            VerticalAlign: =VerticalAlign.Middle
+                                                            Weight: ='TextCanvas.Weight'.Semibold
+                                                            X: =40
+                                                            Y: =40
+      - comHeaderPO_11:
+          Control: CanvasComponent
+          ComponentName: comHeader
+          Properties:
+            Height: =If(varShowUserCtx, 312,60)
+            Width: =Parent.Width
+      - rect_jobModalBackdrop_10:
+          Control: Rectangle@2.3.0
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =2
+            DisabledFill: =RGBA(161, 159, 157, 1)
+            Fill: =RGBA(0,0,0,0.4)
+            FocusedBorderThickness: =4
+            Height: =Parent.Height
+            HoverFill: =RGBA(0,0,0,0.4)
+            OnSelect: |-
+              =UpdateContext({
+                  lvar_showPOPopup: false
+              })
+            PressedFill: =RGBA(0,0,0,0.4)
+            Visible: =lvar_showPOPopup
+            Width: =Parent.Width
+      - con_jobModal_9:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.Regular
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =150
+            LayoutDirection: =LayoutDirection.Vertical
+            PaddingBottom: =varTheme.Body.Container.Padding
+            PaddingLeft: =varTheme.Body.Container.Padding
+            PaddingRight: =varTheme.Body.Container.Padding
+            PaddingTop: =varTheme.Body.Container.Padding
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Visible: =lvar_showPOPopup
+            Width: =600
+            X: =(Parent.Width-Self.Width)/2
+            Y: =(Parent.Height-Self.Height)/2
+          Children:
+            - hcon_centerPopupTitleSOD_16:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  FillPortions: =0
+                  Height: =40
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  PaddingLeft: =10
+                  PaddingRight: =10
+                  Visible: =lvar_showPOPopup
+                Children:
+                  - lbl_centerPopupTitleSOD_18:
+                      Control: Text@0.0.51
+                      Properties:
+                        FillPortions: =1
+                        Height: =Parent.Height
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        Size: =16
+                        Text: ="Do you want to delete this allocation?"
+                        VerticalAlign: =VerticalAlign.Middle
+                        Visible: |
+                          =lvar_showPOPopup
+                        Weight: ='TextCanvas.Weight'.Semibold
+                  - btn_cancelFundJobTopRight_2:
+                      Control: Button@0.0.45
+                      Properties:
+                        Appearance: ='ButtonCanvas.Appearance'.Transparent
+                        Icon: ="Dismiss"
+                        Layout: ='ButtonCanvas.Layout'.IconOnly
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        OnSelect: |-
+                          =UpdateContext({lvar_showPOPopup: false})
+                        Text: ="Close"
+                        Visible: |
+                          =lvar_showPOPopup
+                        Width: =32
+            - hcon_SODProductsActionButtons_15:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Height: =20
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =20
+                  LayoutJustifyContent: =LayoutJustifyContent.End
+                  LayoutMaxHeight: =100
+                  LayoutMaxWidth: =
+                  LayoutMinHeight: =40
+                  Visible: =lvar_showPOPopup
+                  Width: =hcon_centerPopupTitleSOD.Width
+                Children:
+                  - btn_cancelSODProducts_15:
+                      Control: Button@0.0.45
+                      Properties:
+                        Appearance: ='ButtonCanvas.Appearance'.Secondary
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        OnSelect: |-
+                          =Set(gvar_Selected_Allocation, Blank());
+                          UpdateContext({lvar_showPOPopup: false})
+                        Text: ="Cancel"
+                  - btn_Delete_2:
+                      Control: Button@0.0.45
+                      Properties:
+                        BasePaletteColor: =RGBA(25, 70, 250, 1)
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        OnSelect: |-
+                          =// Soft-deletes the selected allocation and refreshes the gallery
+                          ClearCollect(
+                              ColAllocations,
+                              'mosaic-dev'.dbospDeletePoAllocation({
+                                  mode: "PO",
+                                  allocation_id: gvar_Selected_Allocation.id,
+                                  user_id: User().EntraObjectId,
+                                  user_name: User().FullName
+                              }).ResultSets.Table1
+                          );
+
+                          // Close delete confirmation popup
+                          UpdateContext({lvar_showPOPopup: false});
+
+                          // Clear selection variables
+                          Set(gvar_Selected_Allocation, Blank());
+                          UpdateContext({ lrecAlloc: Blank() });
+
+                          // Notify user
+                          Notify("Allocation deleted successfully.", NotificationType.Success);
+                        Text: ="Delete"
+                        Visible: =lvar_showPOPopup
