@@ -3,8 +3,7 @@ Screens:
     Properties:
       Fill: =RGBA(242, 244, 248, 1)
       OnVisible: |+
-        =UpdateContext({ctxActiveTab: "Thread", ctxReplyBody: ""});
-        Set(gblKanbanCreateMode, false);
+        =UpdateContext({ctxActiveTab: "Thread", ctxReplyBody: "", ctxKanbanCreateMode: false});
         If(
             IsBlank(gblCurrentView),
             Set(gblCurrentView, "email");
@@ -161,7 +160,7 @@ Screens:
                   - drp_pipelineFilter:
                       Control: ComboBox@0.0.51
                       Properties:
-                        DefaultSelectedItems: =Filter(Distinct(colPipelineStages, pipeline_name), Value = gblSelectedPipelineName)
+                        DefaultSelectedItems: =Table({Value: gblSelectedPipelineName})
                         Items: =Distinct(colPipelineStages, pipeline_name)
                         OnChange: =Set(gblSelectedPipelineName, Self.Selected.Value)
                         Width: =220
@@ -176,7 +175,7 @@ Screens:
                       Control: Button@0.0.45
                       Properties:
                         BasePaletteColor: =RGBA(59, 130, 246, 1)
-                        OnSelect: =Set(gblKanbanCreateMode, true); Set(gblKanbanSelectedCard, Blank()); Set(gblShowKanbanPanel, true)
+                        OnSelect: =UpdateContext({ctxKanbanCreateMode: true}); Set(gblKanbanSelectedCard, Blank()); Set(gblShowKanbanPanel, true)
                         Text: ="+ New Card"
                         Width: =110
             - gal_pipelineColumns:
@@ -228,7 +227,7 @@ Screens:
                             Properties:
                               Appearance: ='ButtonCanvas.Appearance'.Transparent
                               Height: =Parent.TemplateHeight
-                              OnSelect: =Set(gblKanbanCreateMode, false); Set(gblKanbanSelectedCard, ThisItem); Set(gblShowKanbanPanel, true)
+                              OnSelect: =UpdateContext({ctxKanbanCreateMode: false}); Set(gblKanbanSelectedCard, ThisItem); Set(gblShowKanbanPanel, true)
                               Text: =""
                               Width: =Parent.TemplateWidth
                         - lbl_cardTitle:
@@ -322,7 +321,7 @@ Screens:
                         OnSelect: |-
                           =Patch(
                               'ACE Kanban',
-                              If(gblKanbanCreateMode, Defaults('ACE Kanban'), LookUp('ACE Kanban', id = gblKanbanSelectedCard.id)),
+                              If(ctxKanbanCreateMode, Defaults('ACE Kanban'), LookUp('ACE Kanban', id = gblKanbanSelectedCard.id)),
                               {
                                   title: txt_kTitle.Text,
                                   owner: txt_kOwner.Text,
