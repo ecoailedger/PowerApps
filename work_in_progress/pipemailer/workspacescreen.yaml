@@ -1,0 +1,74 @@
+- hcon_topBar:
+    Control: GroupContainer@1.5.0
+    Variant: AutoLayout
+    Properties:
+      Fill: =RGBA(15, 23, 42, 1)
+      FillPortions: =0
+      Height: =56
+      LayoutAlignItems: =LayoutAlignItems.Center
+      LayoutDirection: =LayoutDirection.Horizontal
+      LayoutGap: =8
+      PaddingLeft: =16
+      PaddingRight: =16
+    Children:
+      - lbl_logo:
+          Control: Text@0.0.51
+          Properties:
+            FontColor: =RGBA(255, 255, 255, 1)
+            Size: =18
+            Text: ="PipeMailer"
+            VerticalAlign: =VerticalAlign.Middle
+            Weight: ='TextCanvas.Weight'.Bold
+            Width: =130
+      - txt_search:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            BorderColor: =RGBA(71, 85, 105, 1)
+            Default: =gblSearchText
+            Fill: =RGBA(30, 41, 59, 1)
+            HintText: ="Search emails, deals, RMA…"
+            HoverBorderColor: =RGBA(147, 197, 253, 1)
+            OnChange: =Set(gblSearchText, Self.Text)
+            Width: =300
+      - btn_viewEmail:
+          Control: Button@0.0.45
+          Properties:
+            Appearance: =If(gblCurrentView = "email", 'ButtonCanvas.Appearance'.Primary, 'ButtonCanvas.Appearance'.Secondary)
+            OnSelect: =Set(gblCurrentView, "email")
+            Text: ="Email View"
+            Width: =104
+      - btn_viewPipeline:
+          Control: Button@0.0.45
+          Properties:
+            Appearance: =If(gblCurrentView = "pipeline", 'ButtonCanvas.Appearance'.Primary, 'ButtonCanvas.Appearance'.Secondary)
+            OnSelect: =Set(gblCurrentView, "pipeline")
+            Text: ="Pipeline View"
+            Width: =116
+      - btn_viewDashboard:
+          Control: Button@0.0.45
+          Properties:
+            Appearance: =If(gblCurrentView = "dashboard", 'ButtonCanvas.Appearance'.Primary, 'ButtonCanvas.Appearance'.Secondary)
+            OnSelect: =Set(gblCurrentView, "dashboard")
+            Text: ="Dashboard"
+            Width: =108
+      - btn_compose:
+          Control: Button@0.0.45
+          Properties:
+            BasePaletteColor: =RGBA(59, 130, 246, 1)
+            OnSelect: =Set(gblShowComposePopup, true)
+            Text: ="+ Add Email"
+            Width: =108
+      - btn_createDeal:
+          Control: Button@0.0.45
+          Properties:
+            Appearance: ='ButtonCanvas.Appearance'.Secondary
+            OnSelect: =Set(gblShowDealPopup, true)
+            Text: ="Add Deal / Return"
+            Width: =148
+      - btn_toggleTheme:
+          Control: Button@0.0.45
+          Properties:
+            Appearance: ='ButtonCanvas.Appearance'.Secondary
+            OnSelect: =Set(gblThemeMode, If(gblThemeMode = "light", "dark", "light"))
+            Text: =If(gblThemeMode = "light", "Dark", "Light")
+            Width: =72
