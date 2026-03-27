@@ -22,7 +22,17 @@ Screens:
         );
         ClearCollect(colAssignees, Assignees);
         ClearCollect(colMacroTemplates, Filter(MacroTemplates, isArchived = false));
-        ClearCollect(colPipelineStages, PipelineStages);
+        ClearCollect(
+            colPipelineStages,
+            ForAll(
+                PipelineStages As stage,
+                {
+                    id: Coalesce(stage.id, stage.stage_id, stage.Id),
+                    name: Coalesce(stage.name, stage.stage_name, stage.Value),
+                    pipeline_name: Coalesce(stage.pipeline_name, stage.pipeline, stage.pipelineName)
+                }
+            )
+        );
         ClearCollect(
             colEmails,
             SortByColumns(Filter(Emails, folder = gblSelectedFolder), "receivedAt", SortOrder.Descending)
@@ -325,7 +335,7 @@ Screens:
                                     Height: =Parent.TemplateHeight
                                     PaddingLeft: =12
                                     Size: =13
-                                    Text: =ThisItem.Value
+                                    Text: =ThisItem.name
                                     VerticalAlign: =VerticalAlign.Middle
                   - vcon_emailList:
                       Control: GroupContainer@1.5.0
@@ -1036,7 +1046,15 @@ Screens:
                                           Height: =18
                                           Size: =12
                                           Text: |-
-                                            ="Stage: " & LookUp(colDeals, id = gblSelectedDealId, stage)
+                                            ="Stage: " & Coalesce(
+                                                LookUp(
+                                                    colPipelineStages,
+                                                    id = LookUp(colDeals, id = gblSelectedDealId, stage_id),
+                                                    name
+                                                ),
+                                                LookUp(colDeals, id = gblSelectedDealId, stage),
+                                                "Unknown"
+                                            )
                                     - lbl_dealValue:
                                         Control: Text@0.0.51
                                         Properties:
