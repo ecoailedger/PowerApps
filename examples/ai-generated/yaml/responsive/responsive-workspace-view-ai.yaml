@@ -161,10 +161,9 @@ Screens:
                   - drp_pipelineFilter:
                       Control: Dropdown@0.0.44
                       Properties:
-                        Default: =gblSelectedPipelineName
-                        Items: =["Customer returns", "Vendor returns", "Repair Returns"]
-                        OnChange: |-
-                          =Set(gblSelectedPipelineName, Self.Selected.Value)
+                        Default: '=gblSelectedPipelineName'
+                        Items: '=["Customer returns", "Vendor returns", "Repair Returns"]'
+                        OnChange: '=Set(gblSelectedPipelineName, Self.Selected.Value)'
                         Width: =220
                   - txt_pipelineSearch:
                       Control: Classic/TextInput@2.3.2
