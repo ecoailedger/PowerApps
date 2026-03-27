@@ -2,7 +2,7 @@ Screens:
   scr_WorkspaceView:
     Properties:
       Fill: =RGBA(242, 244, 248, 1)
-      OnVisible: |+
+      OnVisible: |-
         =UpdateContext({ctxActiveTab: "Thread"});
         If(
             IsBlank(gblCurrentView),
