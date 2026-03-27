@@ -540,33 +540,66 @@ Screens:
                                     receivedAt, SortOrder.Descending
                                 )
                               OnSelect: |-
-                                =Set(gblSelectedEmailId, ThisItem.id);
-                                Set(gblSelectedDealId, ThisItem.dealId);
-                                Set(
-                                    gblSelectedEmail,
+                                =With(
                                     {
-                                        Id: ThisItem.id,
-                                        Subject: Coalesce(ThisItem.Subject, ThisItem.subject),
-                                        BodyPreview: Coalesce(ThisItem.BodyPreview, ThisItem.bodyPreview, ThisItem.snippet),
-                                        From: Coalesce(ThisItem.From, ThisItem.from),
-                                        To: Coalesce(ThisItem.To, ThisItem.to),
-                                        DateTimeReceived: Coalesce(ThisItem.DateTimeReceived, ThisItem.receivedAt),
-                                        IsRead: Coalesce(ThisItem.IsRead, ThisItem.isRead),
-                                        DealId: Coalesce(ThisItem.DealId, ThisItem.dealId),
-                                        AssigneeId: Coalesce(ThisItem.AssigneeId, ThisItem.assigneeId),
-                                        ApprovalStatus: Coalesce(ThisItem.ApprovalStatus, ThisItem.approvalStatus)
-                                    }
-                                );
-                                Set(gblShowReplyComposer, false);
-                                ClearCollect(colCurrentThread, Filter(EmailMessages, emailId = gblSelectedEmailId));
-                                UpdateContext({ctxActiveTab: "Thread"})
+                                        selectedEmailId: Text(Coalesce(ThisItem.Id, ThisItem.id)),
+                                        selectedInternetMessageId: Text(Coalesce(ThisItem.InternetMessageId, ThisItem.internetMessageId, ThisItem.MessageId, ThisItem.messageId))
+                                    },
+                                    Set(
+                                        gblSelectedEmail,
+                                        {
+                                            Id: selectedEmailId,
+                                            Subject: Coalesce(ThisItem.Subject, ThisItem.subject),
+                                            BodyPreview: Coalesce(ThisItem.BodyPreview, ThisItem.bodyPreview, ThisItem.snippet),
+                                            From: Coalesce(ThisItem.From, ThisItem.from),
+                                            To: Coalesce(ThisItem.To, ThisItem.to),
+                                            DateTimeReceived: Coalesce(ThisItem.DateTimeReceived, ThisItem.receivedAt),
+                                            IsRead: true,
+                                            DealId: Coalesce(ThisItem.DealId, ThisItem.dealId),
+                                            AssigneeId: Coalesce(ThisItem.AssigneeId, ThisItem.assigneeId),
+                                            ApprovalStatus: Coalesce(ThisItem.ApprovalStatus, ThisItem.approvalStatus),
+                                            InternetMessageId: selectedInternetMessageId
+                                        }
+                                    );
+                                    Set(gblSelectedEmailId, selectedEmailId);
+                                    Set(gblSelectedDealId, ThisItem.dealId);
+                                    Patch(
+                                        colEmails,
+                                        LookUp(colEmails, Coalesce(Id, id) = selectedEmailId),
+                                        {IsRead: true, isRead: true}
+                                    );
+                                    Set(gblShowReplyComposer, false);
+                                    ClearCollect(
+                                        colCurrentThread,
+                                        With(
+                                            {
+                                                selectedThreadEmailId: Coalesce(
+                                                    selectedEmailId,
+                                                    selectedInternetMessageId,
+                                                    LookUp(
+                                                        colEmails,
+                                                        Coalesce(InternetMessageId, internetMessageId, MessageId, messageId) = selectedInternetMessageId,
+                                                        Coalesce(Id, id)
+                                                    )
+                                                )
+                                            },
+                                            Filter(
+                                                EmailMessages,
+                                                emailId = selectedThreadEmailId Or
+                                                emailId = selectedEmailId Or
+                                                emailId = selectedInternetMessageId
+                                            )
+                                        )
+                                    );
+                                    UpdateContext({ctxActiveTab: "Thread"})
+                                )
                               TemplatePadding: =0
                               TemplateSize: =94
                             Children:
                               - rec_emailRowBg:
                                   Control: Rectangle@2.3.0
                                   Properties:
-                                    Fill: =If(ThisItem.id = gblSelectedEmailId, RGBA(239, 246, 255, 1), If(ThisItem.computedSlaStatus = "overdue" Or ThisItem.computedSlaStatus = "breached", RGBA(255, 241, 242, 1), RGBA(255, 255, 255, 1)))
+                                    Fill: =If(ThisItem.Id = gblSelectedEmailId, RGBA(239, 246, 255, 1), If(ThisItem.computedSlaStatus = "overdue" Or ThisItem.computedSlaStatus = "breached", RGBA(255, 241, 242, 1), RGBA(255, 255, 255, 1)))
                                     Height: =Parent.TemplateHeight
                                     Width: =Parent.TemplateWidth
                               - rec_unreadDot:
